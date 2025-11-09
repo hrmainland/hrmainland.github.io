@@ -6,62 +6,108 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Habit Tracker</title>
-    <!-- <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet"> -->
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <link rel="stylesheet" href="display.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        nav.navbar {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .graphs {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        #graph-row {
+            width: 100%;
+        }
+
+        .habit-heading h2 {
+            font-weight: 600;
+            font-size: 1.8rem;
+            letter-spacing: 0.5px;
+            color: #2b2b2b;
+        }
+
+        .graph-img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 
 <body>
     <nav class="navbar navbar-light bg-light">
         <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">Habit Tracker</span>
+            <span class="navbar-brand mb-0 h1 fw-semibold">Habit Tracker</span>
         </div>
     </nav>
 
-    <div class="graphs container-sm justify-content-end">
-        <div id="graph-row" class="row justify-content-end">
-            <section class="col-md-6 text-center">
+    <div class="graphs container-sm justify-content-center">
+        <div id="graph-row" class="row justify-content-center text-center">
+
+            <section class="col-md-4 mb-4">
                 <div class="habit-heading">
-                    <h2 display="inline" class="display-6">Meditate</h2>
-                    <!-- <img class="flame animated" src="flame-svgrepo-com.svg" alt="flame"> -->
-                </div>
-                <img class="graph-img" src="https://pixe.la/v1/users/hmainland/graphs/med?mode=short"
-                    alt="Pixela Graph">
-            </section>
-            <section class="col-md-6 text-center">
-                <div class="habit-heading">
-                    <h2 display="inline" class="display-6">Uni</h2>
-                    <!-- <img class="flame animated" src="flame-svgrepo-com.svg" alt="flame"> -->
+                    <h2>Uni</h2>
                 </div>
                 <img class="graph-img" src="https://pixe.la/v1/users/hmainland/graphs/uni?mode=short"
                     alt="Pixela Graph">
             </section>
-            <section class="col-md-6 text-center">
+
+            <section class="col-md-4 mb-4">
                 <div class="habit-heading">
-                    <h2 display="inline" class="display-6">Exercise</h2>
-                    <!-- <img class="flame animated" src="flame-svgrepo-com.svg" alt="flame"> -->
+                    <h2>Job Prep</h2>
                 </div>
-                <img class="graph-img" src="https://pixe.la/v1/users/hmainland/graphs/ex?mode=short"
+                <img class="graph-img" src="https://pixe.la/v1/users/hmainland/graphs/job?mode=short"
                     alt="Pixela Graph">
             </section>
-            <section class="col-md-6 text-center">
+
+            <section class="col-md-4 mb-4">
                 <div class="habit-heading">
-                    <h2 display="inline" class="display-6">Sleep</h2>
-                    <!-- <img class="flame animated" src="flame-svgrepo-com.svg" alt="flame"> -->
+                    <h2>Sleep</h2>
                 </div>
                 <img class="graph-img" src="https://pixe.la/v1/users/hmainland/graphs/sleep?mode=short"
                     alt="Pixela Graph">
             </section>
 
+            <section class="col-md-4 mb-4">
+                <div class="habit-heading">
+                    <h2>Meditate</h2>
+                </div>
+                <img class="graph-img" src="https://pixe.la/v1/users/hmainland/graphs/med?mode=short"
+                    alt="Pixela Graph">
+            </section>
+
+            <section class="col-md-4 mb-4">
+                <div class="habit-heading">
+                    <h2>Exercise</h2>
+                </div>
+                <img class="graph-img" src="https://pixe.la/v1/users/hmainland/graphs/ex?mode=short"
+                    alt="Pixela Graph">
+            </section>
+
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
         crossorigin="anonymous"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
-    <!-- <script src="app.js"></script> -->
 </body>
 
 </html>
