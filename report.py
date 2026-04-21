@@ -10,7 +10,7 @@ PIXELA_USERNAME = os.getenv("PIXELA_USERNAME")
 PIXELA_TOKEN    = os.getenv("PIXELA_TOKEN")
 BREVO_API_KEY   = os.getenv("BREVO_API_KEY")
 REPORT_FROM     = os.getenv("REPORT_FROM_EMAIL")
-REPORT_TO       = os.getenv("REPORT_TO_EMAIL")
+REPORT_TO       = [e.strip() for e in os.getenv("REPORT_TO_EMAIL", "").split(",") if e.strip()]
 
 BASE_URL = f"https://pixe.la/v1/users/{PIXELA_USERNAME}"
 HEADERS  = {"X-USER-TOKEN": PIXELA_TOKEN}
@@ -139,7 +139,7 @@ def send_email(html, subject):
         },
         json={
             "sender":      {"email": REPORT_FROM},
-            "to":          [{"email": REPORT_TO}],
+            "to":          [{"email": e} for e in REPORT_TO],
             "subject":     subject,
             "htmlContent": html,
         },
@@ -170,9 +170,9 @@ def main():
     week_ago = today - timedelta(days=6)
     subject  = f"Habit Report — {week_ago.strftime('%b %d')} to {today.strftime('%b %d')}"
 
-    print(f"Sending to {REPORT_TO}...")
+    print(f"Sending to {', '.join(REPORT_TO)}...")
     result = send_email(html, subject)
-    print(f"Sent! id={result.get('id')}")
+    print(f"Sent! messageId={result.get('messageId')}")
 
 
 if __name__ == "__main__":

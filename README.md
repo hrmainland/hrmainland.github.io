@@ -27,7 +27,7 @@ PIXELA_TOKEN=your-token
 
 BREVO_API_KEY=your-brevo-api-key
 REPORT_FROM_EMAIL=reports@yourdomain.com
-REPORT_TO_EMAIL=you@example.com
+REPORT_TO_EMAILS=you@example.com,other@gmail.com
 ```
 
 ## Web UI
