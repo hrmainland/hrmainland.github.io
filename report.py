@@ -46,26 +46,18 @@ def get_pixels_last_week(graph_id):
 
 
 def day_cells(pixels, week_ago):
-    dates_qty = {p["date"]: p["quantity"] for p in pixels}
+    dates = {p["date"] for p in pixels}
     cells = ""
     for i in range(7):
         day   = (week_ago + timedelta(days=i)).strftime("%Y%m%d")
         label = (week_ago + timedelta(days=i)).strftime("%a")
-        qty   = dates_qty.get(day)
-        if qty:
-            cells += (
-                f'<td style="padding:5px 7px;text-align:center;background:#7bc96f;'
-                f'color:white;border-radius:4px;font-size:12px;">'
-                f'{qty}<br><span style="font-size:10px;opacity:0.85">{label}</span></td>'
-                f'<td style="width:4px"></td>'
-            )
-        else:
-            cells += (
-                f'<td style="padding:5px 7px;text-align:center;background:#efefef;'
-                f'color:#bbb;border-radius:4px;font-size:12px;">'
-                f'—<br><span style="font-size:10px">{label}</span></td>'
-                f'<td style="width:4px"></td>'
-            )
+        done  = day in dates
+        cells += (
+            f'<td class="day-cell" style="padding:5px 7px;text-align:center;background:{"#7bc96f" if done else "#efefef"};'
+            f'color:{"white" if done else "#bbb"};border-radius:4px;font-size:12px;">'
+            f'{"✓" if done else "—"}<br><span style="font-size:10px;{"opacity:0.85" if done else ""}">{label}</span></td>'
+            f'<td class="day-gap" style="width:4px"></td>'
+        )
     return cells
 
 
@@ -77,23 +69,17 @@ def build_html(graphs_data):
     rows = ""
     for graph, pixels in graphs_data:
         color   = COLOR_HEX.get(graph.get("color", ""), "#7bc96f")
-        total   = sum(float(p["quantity"]) for p in pixels) if pixels else 0
         active  = len(pixels)
-        summary = (
-            f"{total:.0f} {graph['unit']} across {active} day{'s' if active != 1 else ''}"
-            if pixels else "No activity"
-        )
+        summary = f"{active}/7 days"
         cells = day_cells(pixels, week_ago)
         rows += f"""
         <tr>
-          <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;vertical-align:top;">
-            <div style="display:flex;align-items:center;gap:7px;">
+          <td class="habit-row" style="padding:12px 16px;border-bottom:1px solid #f0f0f0;">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
               <span style="width:9px;height:9px;border-radius:50%;background:{color};display:inline-block;flex-shrink:0;"></span>
               <span style="font-weight:600;font-size:14px;">{graph['name']}</span>
+              <span style="font-size:12px;color:#999;margin-left:4px;">{summary}</span>
             </div>
-            <div style="font-size:12px;color:#999;margin-top:3px;padding-left:16px;">{summary}</div>
-          </td>
-          <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;vertical-align:middle;">
             <table style="border-collapse:separate;border-spacing:0;"><tr>{cells}</tr></table>
           </td>
         </tr>
@@ -101,22 +87,29 @@ def build_html(graphs_data):
 
     return f"""<!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:24px;background:#f4f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <div style="max-width:680px;margin:0 auto;background:white;border-radius:8px;overflow:hidden;border:1px solid #e0e0e0;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    @media (max-width: 600px) {{
+      .outer {{ padding: 8px !important; }}
+      .header {{ padding: 14px 16px !important; }}
+      .habit-row {{ padding: 10px 12px !important; }}
+      .day-cell {{ padding: 5px 6px !important; font-size: 12px !important; border-radius: 4px !important; }}
+      .day-cell span {{ font-size: 10px !important; }}
+      .day-gap {{ width: 3px !important; }}
+    }}
+  </style>
+</head>
+<body style="margin:0;padding:24px;background:#f4f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;text-align:center;">
+  <div class="outer" style="display:inline-block;text-align:left;background:white;border-radius:8px;overflow:hidden;border:1px solid #e0e0e0;">
 
-    <div style="background:#1a1a2e;color:white;padding:20px 24px;">
+    <div class="header" style="background:#1a1a2e;color:white;padding:20px 24px;">
       <div style="font-size:18px;font-weight:600;">Weekly Habit Report</div>
       <div style="font-size:13px;opacity:0.6;margin-top:4px;">{date_range}</div>
     </div>
 
     <table style="width:100%;border-collapse:collapse;">
-      <thead>
-        <tr style="background:#fafafa;">
-          <th style="padding:9px 16px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#aaa;font-weight:600;border-bottom:1px solid #eee;">Habit</th>
-          <th style="padding:9px 16px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#aaa;font-weight:600;border-bottom:1px solid #eee;">Last 7 Days</th>
-        </tr>
-      </thead>
       <tbody>
         {rows}
       </tbody>
