@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")"
 
 git pull
 
-pip install -q -r simple/requirements.txt
+pip install -q -r requirements.txt
 
-python simple/report.py
+python report.py
