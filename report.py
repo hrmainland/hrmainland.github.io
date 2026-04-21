@@ -10,7 +10,7 @@ PIXELA_USERNAME = os.getenv("PIXELA_USERNAME")
 PIXELA_TOKEN    = os.getenv("PIXELA_TOKEN")
 BREVO_API_KEY   = os.getenv("BREVO_API_KEY")
 REPORT_FROM     = os.getenv("REPORT_FROM_EMAIL")
-REPORT_TO       = [e.strip() for e in os.getenv("REPORT_TO_EMAIL", "").split(",") if e.strip()]
+REPORT_TO       = [e.strip() for e in os.getenv("REPORT_TO_EMAILS", "").split(",") if e.strip()]
 
 BASE_URL = f"https://pixe.la/v1/users/{PIXELA_USERNAME}"
 HEADERS  = {"X-USER-TOKEN": PIXELA_TOKEN}
