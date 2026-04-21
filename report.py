@@ -149,7 +149,7 @@ def send_email(html, subject):
 
 
 def main():
-    missing = [v for v in ["PIXELA_USERNAME", "PIXELA_TOKEN", "BREVO_API_KEY", "REPORT_FROM_EMAIL", "REPORT_TO_EMAIL"] if not os.getenv(v)]
+    missing = [v for v in ["PIXELA_USERNAME", "PIXELA_TOKEN", "BREVO_API_KEY", "REPORT_FROM_EMAIL", "REPORT_TO_EMAILS"] if not os.getenv(v)]
     if missing:
         print(f"Missing env vars: {', '.join(missing)}")
         sys.exit(1)
