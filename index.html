@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixela Manager</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f6; color: #333; }
+
+    header { background: #1a1a2e; color: white; padding: 16px 24px; }
+    header h1 { font-size: 1.3rem; font-weight: 600; letter-spacing: 0.3px; }
+
+    .tab-btn {
+      background: transparent; color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 4px; padding: 5px 12px; font-size: 12px; cursor: pointer; font-weight: 500;
+    }
+    .tab-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+    .tab-btn.tab-active { background: rgba(255,255,255,0.2); color: white; border-color: rgba(255,255,255,0.6); }
+
+    .config {
+      background: white; border-bottom: 1px solid #e0e0e0;
+      padding: 14px 24px; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
+    }
+    .config-field { display: flex; flex-direction: column; gap: 4px; }
+    .config-field label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; }
+    .config-field input { border: 1px solid #ddd; border-radius: 4px; padding: 7px 10px; font-size: 14px; width: 190px; }
+
+    .main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px 24px; max-width: 1100px; margin: 0 auto; }
+
+    .card { background: white; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; }
+    .card-header { padding: 13px 18px; font-weight: 600; font-size: 14px; border-bottom: 1px solid #eee; background: #fafafa; }
+    .card-body { padding: 18px; }
+
+    .section { margin-bottom: 18px; }
+    .section:last-child { margin-bottom: 0; }
+    .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 10px; font-weight: 600; }
+
+    form { display: flex; flex-direction: column; gap: 9px; }
+    .field { display: flex; flex-direction: column; gap: 3px; }
+    .field label { font-size: 12px; color: #666; }
+    input, select { border: 1px solid #ddd; border-radius: 4px; padding: 7px 10px; font-size: 14px; width: 100%; background: white; }
+    input:focus, select:focus { outline: none; border-color: #4a90d9; }
+    input[readonly] { background: #f7f7f7; color: #888; cursor: default; }
+
+    button {
+      background: #4a90d9; color: white; border: none;
+      border-radius: 4px; padding: 8px 14px; font-size: 13px;
+      cursor: pointer; font-weight: 500; white-space: nowrap;
+    }
+    button:hover { background: #3a7bc8; }
+    button:active { background: #2a6bb8; }
+    button.danger { background: #e74c3c; }
+    button.danger:hover { background: #c0392b; }
+    button.secondary { background: #6c757d; }
+    button.secondary:hover { background: #5a6268; }
+    button.sm { padding: 6px 12px; font-size: 12px; }
+
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
+
+    .graph-list { display: flex; flex-direction: column; gap: 6px; }
+    .graph-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 9px 12px; border: 1px solid #eee; border-radius: 6px;
+      cursor: pointer; transition: background 0.1s;
+    }
+    .graph-item:hover { background: #f5f7ff; }
+    .graph-item.selected { background: #e8f0fe; border-color: #4a90d9; }
+    .graph-name { font-weight: 500; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+    .graph-meta { font-size: 11px; color: #aaa; }
+
+    .color-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .col-shibafu { background: #7bc96f; }
+    .col-momiji  { background: #e05d44; }
+    .col-sora    { background: #4a90d9; }
+    .col-ichou   { background: #f0c419; }
+    .col-ajisai  { background: #9b59b6; }
+    .col-kuro    { background: #333; }
+
+    .response {
+      background: #1e1e1e; color: #ccc; border-radius: 6px;
+      padding: 12px; font-family: 'Courier New', monospace; font-size: 12px;
+      margin-top: 14px; white-space: pre-wrap; word-break: break-all;
+      min-height: 52px; max-height: 260px; overflow-y: auto;
+      line-height: 1.5;
+    }
+    .response.success { border-left: 3px solid #2ecc71; }
+    .response.error   { border-left: 3px solid #e74c3c; }
+
+    .empty-hint { color: #bbb; font-size: 13px; padding: 4px 0; }
+
+    #view-manager { display: none; }
+
+    .dashboard-grid {
+      display: flex; flex-wrap: wrap; gap: 24px; justify-content: center;
+      padding: 28px 24px; max-width: 1100px; margin: 0 auto;
+    }
+    .dashboard-card {
+      background: white; border-radius: 8px; border: 1px solid #e0e0e0;
+      padding: 20px; text-align: center; min-width: 260px; flex: 1 1 260px; max-width: 380px;
+    }
+    .dashboard-card h2 {
+      font-size: 1.2rem; font-weight: 600; color: #2b2b2b; margin-bottom: 14px;
+    }
+    .dashboard-card img { max-width: 100%; border-radius: 6px; }
+    .dashboard-empty { color: #aaa; font-size: 14px; padding: 40px; text-align: center; }
+
+    @media (max-width: 720px) {
+      .main { grid-template-columns: 1fr; }
+      .config-field input { width: 150px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex; align-items:center; gap:20px;">
+    <h1>Pixela</h1>
+    <div style="display:flex; gap:4px;">
+      <button id="tab-dashboard" class="tab-btn tab-active" onclick="switchTab('dashboard')">Dashboard</button>
+      <button id="tab-manager" class="tab-btn" onclick="switchTab('manager')">Manager</button>
+    </div>
+  </div>
+</header>
+
+<div class="config">
+  <div class="config-field">
+    <label>Username</label>
+    <input id="username" value="hmainland" readonly>
+  </div>
+  <div class="config-field">
+    <label>Token</label>
+    <input id="token" type="password" placeholder="your-token (required for Manager)">
+  </div>
+  <button onclick="saveToken()">Save Token</button>
+  <button class="secondary" id="load-graphs-btn" onclick="loadGraphs()" style="display:none;">Load Graphs</button>
+</div>
+
+<div id="view-dashboard">
+  <div class="dashboard-grid" id="dashboard-grid">
+    <div class="dashboard-empty">Loading…</div>
+  </div>
+</div>
+
+<div id="view-manager">
+  <div class="main">
+
+    <!-- LEFT: GRAPHS -->
+    <div class="card">
+      <div class="card-header">Graphs</div>
+      <div class="card-body">
+
+        <div class="section">
+          <div class="section-title">Your Graphs</div>
+          <div class="graph-list" id="graph-list">
+            <span class="empty-hint">Click "Load Graphs" above</span>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="section">
+          <div class="section-title">Create Graph</div>
+          <form onsubmit="createGraph(event)">
+            <div class="field">
+              <label>ID <span style="color:#bbb;font-size:11px;">(lowercase, letters/numbers/hyphens)</span></label>
+              <input id="g-id" placeholder="my-habit" pattern="^[a-z][a-z0-9-]{1,17}" required>
+            </div>
+            <div class="field"><label>Name</label><input id="g-name" placeholder="Meditation" required></div>
+            <div class="field"><label>Unit</label><input id="g-unit" placeholder="minutes" required></div>
+            <div class="field">
+              <label>Type</label>
+              <select id="g-type">
+                <option value="int">int</option>
+                <option value="float">float</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Color</label>
+              <select id="g-color">
+                <option value="shibafu">Green (shibafu)</option>
+                <option value="momiji">Red (momiji)</option>
+                <option value="sora">Blue (sora)</option>
+                <option value="ichou">Yellow (ichou)</option>
+                <option value="ajisai">Purple (ajisai)</option>
+                <option value="kuro">Black (kuro)</option>
+              </select>
+            </div>
+            <button type="submit">Create Graph</button>
+          </form>
+        </div>
+
+        <hr>
+
+        <div class="section">
+          <div class="section-title">
+            Update / Delete Graph
+            <span id="graph-sel-label" style="color:#4a90d9;font-weight:400;text-transform:none;font-size:12px;"> — select a graph above</span>
+          </div>
+          <form onsubmit="updateGraph(event)">
+            <div class="field"><label>Name</label><input id="ug-name" placeholder="Leave blank to skip"></div>
+            <div class="field"><label>Unit</label><input id="ug-unit" placeholder="Leave blank to skip"></div>
+            <div class="field">
+              <label>Color</label>
+              <select id="ug-color">
+                <option value="">— no change —</option>
+                <option value="shibafu">Green (shibafu)</option>
+                <option value="momiji">Red (momiji)</option>
+                <option value="sora">Blue (sora)</option>
+                <option value="ichou">Yellow (ichou)</option>
+                <option value="ajisai">Purple (ajisai)</option>
+                <option value="kuro">Black (kuro)</option>
+              </select>
+            </div>
+            <div class="btn-row">
+              <button type="submit">Update</button>
+              <button type="button" class="danger" onclick="deleteGraph()">Delete</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="response" id="graph-response">// Graph API responses will appear here</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: PIXELS -->
+    <div class="card">
+      <div class="card-header">Pixels</div>
+      <div class="card-body">
+
+        <div class="section">
+          <div class="section-title">
+            Active Graph: <span id="pixel-graph-label" style="color:#4a90d9;font-weight:400;text-transform:none;font-size:12px;">select from Graphs panel</span>
+          </div>
+          <div class="field">
+            <label>Date (yyyyMMdd)</label>
+            <input id="p-date" placeholder="20240415" maxlength="8">
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="section">
+          <div class="section-title">Record Pixel</div>
+          <form onsubmit="addPixel(event)">
+            <div class="field"><label>Quantity</label><input id="p-quantity" placeholder="30" required></div>
+            <div class="btn-row">
+              <button type="submit">Add</button>
+              <button type="button" onclick="updatePixel()">Update</button>
+            </div>
+          </form>
+        </div>
+
+        <hr>
+
+        <div class="section">
+          <div class="section-title">Get / Delete Pixel</div>
+          <div class="btn-row">
+            <button onclick="getPixel()">Get</button>
+            <button class="danger" onclick="deletePixel()">Delete</button>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="section">
+          <div class="section-title">Pixel Range</div>
+          <form onsubmit="getPixels(event)">
+            <div class="btn-row" style="align-items: flex-end;">
+              <div class="field" style="flex:1"><label>From</label><input id="p-from" placeholder="20240408"></div>
+              <div class="field" style="flex:1"><label>To</label><input id="p-to" placeholder="20240415"></div>
+              <button type="submit" class="sm">Get</button>
+            </div>
+          </form>
+        </div>
+
+        <hr>
+
+        <div class="section">
+          <div class="section-title">Graph Stats</div>
+          <button onclick="getStats()">Get Stats</button>
+        </div>
+
+        <div class="response" id="pixel-response">// Pixel API responses will appear here</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const BASE = 'https://pixe.la/v1/users';
+  const USERNAME = 'hmainland';
+  let selectedGraph = null;
+
+  function cfg() {
+    return {
+      username: USERNAME,
+      token: document.getElementById('token').value.trim(),
+    };
+  }
+
+  function authHeaders() {
+    return { 'X-USER-TOKEN': cfg().token, 'Content-Type': 'application/json' };
+  }
+
+  function saveToken() {
+    const token = document.getElementById('token').value.trim();
+    if (token) localStorage.setItem('pixela_token', token);
+    showResponse('graph-response', { message: 'Token saved.' }, true);
+  }
+
+  function loadConfig() {
+    const t = localStorage.getItem('pixela_token');
+    if (t) document.getElementById('token').value = t;
+  }
+
+  function showResponse(id, data, ok) {
+    const el = document.getElementById(id);
+    el.textContent = JSON.stringify(data, null, 2);
+    el.className = 'response ' + (ok ? 'success' : 'error');
+  }
+
+  async function apiFetch(method, url, body, responseId) {
+    try {
+      const opts = { method, headers: authHeaders() };
+      if (body) opts.body = JSON.stringify(body);
+      const res = await fetch(url, opts);
+      const data = await res.json();
+      showResponse(responseId, data, res.ok);
+      return { ok: res.ok, data };
+    } catch (err) {
+      showResponse(responseId, { error: err.message }, false);
+      return { ok: false };
+    }
+  }
+
+  function cacheGraphs(graphs) {
+    localStorage.setItem('pixela_graphs_' + USERNAME, JSON.stringify(graphs));
+  }
+
+  function getCachedGraphs() {
+    const raw = localStorage.getItem('pixela_graphs_' + USERNAME);
+    return raw ? JSON.parse(raw) : null;
+  }
+
+  async function loadGraphs() {
+    const { ok, data } = await apiFetch('GET', `${BASE}/${USERNAME}/graphs`, null, 'graph-response');
+    if (ok) {
+      const graphs = data.graphs || [];
+      renderGraphList(graphs);
+      cacheGraphs(graphs);
+    }
+  }
+
+  const COLOR_CLASS = {
+    shibafu: 'col-shibafu', momiji: 'col-momiji', sora: 'col-sora',
+    ichou: 'col-ichou', ajisai: 'col-ajisai', kuro: 'col-kuro',
+  };
+
+  function renderGraphList(graphs) {
+    const el = document.getElementById('graph-list');
+    if (!graphs.length) {
+      el.innerHTML = '<span class="empty-hint">No graphs found</span>';
+      return;
+    }
+    el.innerHTML = graphs.map(g => `
+      <div class="graph-item" data-id="${g.id}" onclick="selectGraph(this, ${JSON.stringify(g).replace(/"/g, '&quot;')})">
+        <div class="graph-name">
+          <span class="color-dot ${COLOR_CLASS[g.color] || ''}"></span>
+          ${g.name}
+        </div>
+        <span class="graph-meta">${g.id} · ${g.unit}</span>
+      </div>
+    `).join('');
+  }
+
+  function selectGraph(el, graph) {
+    selectedGraph = graph;
+    document.querySelectorAll('.graph-item').forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('graph-sel-label').textContent = ` — ${graph.name} (${graph.id})`;
+    document.getElementById('pixel-graph-label').textContent = `${graph.name} (${graph.id})`;
+    document.getElementById('ug-name').value = graph.name || '';
+    document.getElementById('ug-unit').value = graph.unit || '';
+    document.getElementById('ug-color').value = graph.color || '';
+    const today = new Date();
+    document.getElementById('p-date').value =
+      today.getFullYear().toString() +
+      String(today.getMonth() + 1).padStart(2, '0') +
+      String(today.getDate()).padStart(2, '0');
+  }
+
+  async function createGraph(e) {
+    e.preventDefault();
+    const body = {
+      id:    document.getElementById('g-id').value,
+      name:  document.getElementById('g-name').value,
+      unit:  document.getElementById('g-unit').value,
+      type:  document.getElementById('g-type').value,
+      color: document.getElementById('g-color').value,
+    };
+    const { ok } = await apiFetch('POST', `${BASE}/${USERNAME}/graphs`, body, 'graph-response');
+    if (ok) loadGraphs();
+  }
+
+  async function updateGraph(e) {
+    e.preventDefault();
+    if (!selectedGraph) { alert('Select a graph first.'); return; }
+    const body = {};
+    const name  = document.getElementById('ug-name').value;
+    const unit  = document.getElementById('ug-unit').value;
+    const color = document.getElementById('ug-color').value;
+    if (name)  body.name  = name;
+    if (unit)  body.unit  = unit;
+    if (color) body.color = color;
+    const { ok } = await apiFetch('PUT', `${BASE}/${USERNAME}/graphs/${selectedGraph.id}`, body, 'graph-response');
+    if (ok) loadGraphs();
+  }
+
+  async function deleteGraph() {
+    if (!selectedGraph) { alert('Select a graph first.'); return; }
+    if (!confirm(`Delete graph "${selectedGraph.name}"? This cannot be undone.`)) return;
+    const { ok } = await apiFetch('DELETE', `${BASE}/${USERNAME}/graphs/${selectedGraph.id}`, null, 'graph-response');
+    if (ok) {
+      selectedGraph = null;
+      document.getElementById('graph-sel-label').textContent = ' — select a graph above';
+      document.getElementById('pixel-graph-label').textContent = 'select from Graphs panel';
+      loadGraphs();
+    }
+  }
+
+  function requireGraphAndDate() {
+    if (!selectedGraph) { alert('Select a graph first.'); return null; }
+    const date = document.getElementById('p-date').value.trim();
+    if (!date) { alert('Enter a date (yyyyMMdd).'); return null; }
+    return { graphId: selectedGraph.id, date };
+  }
+
+  async function addPixel(e) {
+    e.preventDefault();
+    const sel = requireGraphAndDate();
+    if (!sel) return;
+    const body = { date: sel.date, quantity: document.getElementById('p-quantity').value };
+    await apiFetch('POST', `${BASE}/${USERNAME}/graphs/${sel.graphId}`, body, 'pixel-response');
+  }
+
+  async function updatePixel() {
+    const sel = requireGraphAndDate();
+    if (!sel) return;
+    const body = { quantity: document.getElementById('p-quantity').value };
+    await apiFetch('PUT', `${BASE}/${USERNAME}/graphs/${sel.graphId}/${sel.date}`, body, 'pixel-response');
+  }
+
+  async function getPixel() {
+    const sel = requireGraphAndDate();
+    if (!sel) return;
+    await apiFetch('GET', `${BASE}/${USERNAME}/graphs/${sel.graphId}/${sel.date}`, null, 'pixel-response');
+  }
+
+  async function deletePixel() {
+    const sel = requireGraphAndDate();
+    if (!sel) return;
+    if (!confirm(`Delete pixel on ${sel.date}?`)) return;
+    await apiFetch('DELETE', `${BASE}/${USERNAME}/graphs/${sel.graphId}/${sel.date}`, null, 'pixel-response');
+  }
+
+  async function getPixels(e) {
+    e.preventDefault();
+    if (!selectedGraph) { alert('Select a graph first.'); return; }
+    const from = document.getElementById('p-from').value.trim();
+    const to   = document.getElementById('p-to').value.trim();
+    let url = `${BASE}/${USERNAME}/graphs/${selectedGraph.id}/pixels?withBody=true`;
+    if (from) url += `&from=${from}`;
+    if (to)   url += `&to=${to}`;
+    await apiFetch('GET', url, null, 'pixel-response');
+  }
+
+  async function getStats() {
+    if (!selectedGraph) { alert('Select a graph first.'); return; }
+    await apiFetch('GET', `${BASE}/${USERNAME}/graphs/${selectedGraph.id}/stats`, null, 'pixel-response');
+  }
+
+  function renderDashboard(graphs) {
+    const grid = document.getElementById('dashboard-grid');
+    if (!graphs.length) {
+      grid.innerHTML = '<div class="dashboard-empty">No graphs found.</div>';
+      return;
+    }
+    grid.innerHTML = graphs.map(g => `
+      <div class="dashboard-card">
+        <h2>${g.name}</h2>
+        <img src="https://pixe.la/v1/users/${USERNAME}/graphs/${g.id}?mode=short" alt="${g.name}">
+      </div>
+    `).join('');
+  }
+
+  async function loadDashboard() {
+    const grid = document.getElementById('dashboard-grid');
+    const cached = getCachedGraphs();
+
+    if (cached) {
+      renderDashboard(cached);
+      // Silently refresh list in background if token available
+      const token = document.getElementById('token').value.trim();
+      if (token) {
+        fetch(`${BASE}/${USERNAME}/graphs`, { headers: { 'X-USER-TOKEN': token } })
+          .then(r => r.ok ? r.json() : null)
+          .then(data => { if (data && data.graphs) { cacheGraphs(data.graphs); renderDashboard(data.graphs); } })
+          .catch(() => {});
+      }
+      return;
+    }
+
+    const token = document.getElementById('token').value.trim();
+    if (!token) {
+      grid.innerHTML = '<div class="dashboard-empty">Go to Manager tab, enter your token and click "Load Graphs" — the dashboard will remember your graphs for next time.</div>';
+      return;
+    }
+
+    grid.innerHTML = '<div class="dashboard-empty">Loading…</div>';
+    try {
+      const res = await fetch(`${BASE}/${USERNAME}/graphs`, { headers: { 'X-USER-TOKEN': token } });
+      const data = await res.json();
+      const graphs = data.graphs || [];
+      cacheGraphs(graphs);
+      renderDashboard(graphs);
+    } catch (err) {
+      grid.innerHTML = `<div class="dashboard-empty">Error: ${err.message}</div>`;
+    }
+  }
+
+  function switchTab(tab) {
+    const isDashboard = tab === 'dashboard';
+    document.getElementById('view-dashboard').style.display = isDashboard ? 'block' : 'none';
+    document.getElementById('view-manager').style.display   = isDashboard ? 'none' : 'block';
+    document.getElementById('load-graphs-btn').style.display = isDashboard ? 'none' : '';
+    document.getElementById('tab-dashboard').classList.toggle('tab-active', isDashboard);
+    document.getElementById('tab-manager').classList.toggle('tab-active', !isDashboard);
+    if (isDashboard) loadDashboard();
+  }
+
+  loadConfig();
+  switchTab('dashboard');
+</script>
+
+</body>
+</html>
